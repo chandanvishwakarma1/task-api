@@ -16,8 +16,30 @@ Tests assert *intended* behavior, not current behavior. For known-but-unfixed bu
 `test.failing` so the suite stays green yet every bug stays visible in the code; whoever
 fixes a bug is forced to flip that test to a normal `test`.
 
-Coverage: run `npm run coverage` (paste the summary here before submitting).
-The only code I expect to be uncovered is the `app.listen` block in `app.js`.
+## Test results and coverage
+`npm test`: 3 suites, **111 tests passing** (97 regular + 14 `test.failing` that document open bugs).
+
+`npm run coverage`:
+
+```
+-----------------|---------|----------|---------|---------|-------------------
+File             | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s
+-----------------|---------|----------|---------|---------|-------------------
+All files        |   98.75 |    97.75 |   96.66 |   98.63 |
+ src             |   84.61 |       75 |      50 |   84.61 |
+  app.js         |   84.61 |       75 |      50 |   84.61 | 17-18
+ src/routes      |     100 |      100 |     100 |     100 |
+  tasks.js       |     100 |      100 |     100 |     100 |
+ src/services    |     100 |    94.73 |     100 |     100 |
+  taskService.js |     100 |    94.73 |     100 |     100 | 25
+ src/utils       |     100 |      100 |     100 |     100 |
+  validators.js  |     100 |      100 |     100 |     100 |
+-----------------|---------|----------|---------|---------|-------------------
+```
+
+Well above the 80% target. The only gaps: `app.js` lines 17-18 (the `app.listen`
+call, which only runs when the file is started directly, not when imported by tests) and one
+untested branch in `getStats` (line 25: a task with an unrecognised status).
 
 ## `assign` design decisions
 | Question | Decision | Why |
