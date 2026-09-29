@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const taskService = require('../services/taskService');
-const { validateCreateTask, validateUpdateTask } = require('../utils/validators');
+const { validateCreateTask, validateUpdateTask, validateAssign } = require('../utils/validators');
 
 router.get('/stats', (req, res) => {
   const stats = taskService.getStats();
@@ -62,6 +62,27 @@ router.delete('/:id', (req, res) => {
 
 router.patch('/:id/complete', (req, res) => {
   const task = taskService.completeTask(req.params.id);
+  if (!task) {
+    return res.status(404).json({ error: 'Task not found' });
+  }
+
+  res.json(task);
+});
+
+// NEW: assign a task to a person.
+// Design decisions:
+//  - Validation runs before the lookup, matching how PUT / POST behave.
+//  - Re-assigning an already-assigned task is allowed and simply overwrites the
+//    assignee (200). PATCH is a partial update, and "reassign to someone else"
+//    is a normal workflow; a 409 would force clients to unassign first, and
+//    there is no unassign endpoint. Assigning the same name again is idempotent.
+router.patch('/:id/assign', (req, res) => {
+  const error = validateAssign(req.body);
+  if (error) {
+    return res.status(400).json({ error });
+  }
+
+  const task = taskService.assignTask(req.params.id, req.body.assignee);
   if (!task) {
     return res.status(404).json({ error: 'Task not found' });
   }

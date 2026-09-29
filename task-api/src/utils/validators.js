@@ -33,4 +33,24 @@ const validateUpdateTask = (body) => {
   return null;
 };
 
-module.exports = { validateCreateTask, validateUpdateTask };
+// NEW: validation for PATCH /tasks/:id/assign.
+// - assignee must be a string (rejects numbers, null, objects, missing)
+// - must not be empty/whitespace-only after trimming
+// - capped at MAX_ASSIGNEE_LENGTH so a client can't store arbitrarily large blobs
+const MAX_ASSIGNEE_LENGTH = 100;
+
+const validateAssign = (body) => {
+  if (!body || typeof body.assignee !== 'string') {
+    return 'assignee is required and must be a string';
+  }
+  const trimmed = body.assignee.trim();
+  if (trimmed === '') {
+    return 'assignee must be a non-empty string';
+  }
+  if (trimmed.length > MAX_ASSIGNEE_LENGTH) {
+    return `assignee must be at most ${MAX_ASSIGNEE_LENGTH} characters`;
+  }
+  return null;
+};
+
+module.exports = { validateCreateTask, validateUpdateTask, validateAssign, MAX_ASSIGNEE_LENGTH };

@@ -9,7 +9,9 @@ const findById = (id) => tasks.find((t) => t.id === id);
 const getByStatus = (status) => tasks.filter((t) => t.status.includes(status));
 
 const getPaginated = (page, limit) => {
-  // FIX (Bug #1): pages are 1-indexed, so offset is (page - 1) * limit.
+  // FIX (Bug #1): pages are 1-indexed (the route defaults page to 1), so the
+  // offset must be (page - 1) * limit. The original `page * limit` skipped the
+  // entire first page of results.
   const offset = (page - 1) * limit;
   return tasks.slice(offset, offset + limit);
 };
@@ -39,6 +41,8 @@ const create = ({ title, description = '', status = 'todo', priority = 'medium',
     dueDate,
     completedAt: null,
     createdAt: new Date().toISOString(),
+    // NEW: tasks start unassigned. Set via PATCH /tasks/:id/assign.
+    assignee: null,
   };
   tasks.push(task);
   return task;
@@ -77,6 +81,18 @@ const completeTask = (id) => {
   return updated;
 };
 
+// NEW: assign (or re-assign) a task. Returns the updated task, or null if the
+// task doesn't exist. Input validation lives in validators.validateAssign; the
+// value is trimmed here so ' Alice ' and 'Alice' are stored identically.
+const assignTask = (id, assignee) => {
+  const index = tasks.findIndex((t) => t.id === id);
+  if (index === -1) return null;
+
+  const updated = { ...tasks[index], assignee: assignee.trim() };
+  tasks[index] = updated;
+  return updated;
+};
+
 const _reset = () => {
   tasks = [];
 };
@@ -91,5 +107,6 @@ module.exports = {
   update,
   remove,
   completeTask,
+  assignTask,
   _reset,
 };
