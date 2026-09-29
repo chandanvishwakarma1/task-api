@@ -65,7 +65,7 @@ ASSIGNMENT.md               # Full brief — read this first
 | `DELETE` | `/tasks/:id`              | Delete a task (returns 204)              |
 | `PATCH`  | `/tasks/:id/complete`     | Mark a task as complete                  |
 | `GET`    | `/tasks/stats`            | Counts by status + overdue count         |
-| `PATCH`  | `/tasks/:id/assign`       | **Assign a task to a user** _(to implement)_ |
+| `PATCH`  | `/tasks/:id/assign`       | Assign (or re-assign) a task. Body: `{ "assignee": "name" }`. 400 on empty/non-string/over 100 chars, 404 if not found |
 
 ### Task shape
 
@@ -74,11 +74,12 @@ ASSIGNMENT.md               # Full brief — read this first
   "id": "uuid",
   "title": "string",
   "description": "string",
-  "status": "pending | in-progress | completed",
+  "status": "todo | in_progress | done",
   "priority": "low | medium | high",
   "dueDate": "ISO 8601 or null",
   "completedAt": "ISO 8601 or null",
-  "createdAt": "ISO 8601"
+  "createdAt": "ISO 8601",
+  "assignee": "string or null"
 }
 ```
 
@@ -93,7 +94,7 @@ curl -X POST http://localhost:3000/tasks \
 
 **List tasks with filter**
 ```bash
-curl "http://localhost:3000/tasks?status=pending&page=1&limit=10"
+curl "http://localhost:3000/tasks?status=todo&page=1&limit=10"
 ```
 
 **Mark complete**
@@ -111,3 +112,10 @@ See [ASSIGNMENT.md](./ASSIGNMENT.md) for full submission requirements. At minimu
 - **Bug report** — what you found, where in the code, and why it's a bug (not just symptoms)
 - **At least one fix** — with a note on your approach
 - **`PATCH /tasks/:id/assign` implementation** — plus a short explanation of any design decisions (validation, edge cases, etc.)
+
+---
+
+## Submission extras
+
+- [`BUG_REPORT.md`](./BUG_REPORT.md) — bugs found (1 fixed, rest documented with `test.failing` tests)
+- [`SUBMISSION_NOTES.md`](./SUBMISSION_NOTES.md) — design decisions, next steps, open questions
